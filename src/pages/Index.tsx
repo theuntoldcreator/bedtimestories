@@ -1,11 +1,44 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import Header from '@/components/Header';
+import StoryForm from '@/components/StoryForm';
+import StoryDisplay from '@/components/StoryDisplay';
+import StoryLoading from '@/components/StoryLoading';
+
+interface Story {
+  post: string;
+  response: string;
+}
 
 const Index = () => {
+  const [generatedStory, setGeneratedStory] = useState<Story | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStoryGenerated = (story: Story) => {
+    setGeneratedStory(story);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen dreamy-bg">
+      <div className="container max-w-4xl px-4 py-8">
+        <Header />
+        
+        <div className="space-y-8">
+          <StoryForm 
+            onStoryGenerated={handleStoryGenerated} 
+            setIsLoading={setIsLoading} 
+          />
+          
+          {isLoading && <StoryLoading />}
+          
+          {!isLoading && generatedStory && (
+            <StoryDisplay story={generatedStory} />
+          )}
+        </div>
+        
+        <footer className="mt-12 text-center text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} Magical Bedtime Stories</p>
+        </footer>
       </div>
     </div>
   );
