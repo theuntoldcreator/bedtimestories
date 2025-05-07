@@ -69,7 +69,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       // Prepare the data for the n8n webhook
       const storyElementsList = data.storyElements.join(", ");
       
-      const response = await fetch("http://localhost:5678/webhook/1d437a1b-b5ad-4104-b190-36bf9c90fb15", {
+      const response = await fetch("http://localhost:5678/webhook/bedtimestories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
