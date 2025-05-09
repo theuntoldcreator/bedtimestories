@@ -12,6 +12,9 @@ interface StoryDisplayProps {
 
 const StoryDisplay = ({ story }: StoryDisplayProps) => {
   if (!story) return null;
+  
+  // Add a safe check for story.response
+  const paragraphs = story.response ? story.response.split('\n') : [];
 
   return (
     <div className="animate-fade-in">
@@ -24,7 +27,7 @@ const StoryDisplay = ({ story }: StoryDisplayProps) => {
         </CardHeader>
         <CardContent>
           <div className="story-text text-lg">
-            {story.response.split('\n').map((paragraph, index) => (
+            {paragraphs.map((paragraph, index) => (
               <p key={index} className="mb-4">{paragraph}</p>
             ))}
           </div>
