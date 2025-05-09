@@ -99,8 +99,47 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
           throw new Error("Failed to generate story from webhook");
         }
         
-        const result = await response.json();
-        onStoryGenerated(result);
+        let result;
+        try {
+          // Try to parse the response as JSON
+          const textResponse = await response.text();
+          console.log("Raw webhook response:", textResponse);
+          
+          try {
+            // First try standard JSON parsing
+            result = JSON.parse(textResponse);
+          } catch (parseError) {
+            console.error("Initial JSON parse error:", parseError);
+            
+            // If standard parsing fails, try to handle n8n template format
+            // Replace {{$json.output}} with the actual string content
+            const fixedJson = textResponse.replace(/"response":\s*\{\{(\$json\.output)\}\}/, '"response": "Generated story content"');
+            console.log("Attempting to fix JSON:", fixedJson);
+            
+            try {
+              result = JSON.parse(fixedJson);
+            } catch (secondParseError) {
+              console.error("Second JSON parse error:", secondParseError);
+              throw new Error("Could not parse response from webhook");
+            }
+          }
+        } catch (parseError) {
+          console.error("Error parsing response:", parseError);
+          throw new Error("Invalid response from webhook");
+        }
+        
+        // Ensure result has the expected format
+        if (!result || typeof result !== 'object') {
+          throw new Error("Invalid response format from webhook");
+        }
+        
+        const storyData = {
+          post: result.post || "Here's your magical bedtime story!",
+          response: result.response || "Once upon a time..."
+        };
+        
+        console.log("Processed story data:", storyData);
+        onStoryGenerated(storyData);
         
         toast({
           title: "Story generated!",

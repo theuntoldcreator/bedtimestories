@@ -6,7 +6,7 @@ import { Star } from "lucide-react";
 interface StoryDisplayProps {
   story: {
     post: string;
-    response: string;
+    response: string | any;
   } | null;
 }
 
@@ -14,12 +14,29 @@ const StoryDisplay = ({ story }: StoryDisplayProps) => {
   if (!story) return null;
   
   // Add a safe check for story.response and handle different response formats
-  const response = story.response || "";
-  const paragraphs = typeof response === 'string' 
-    ? response.split('\n').filter(p => p.trim() !== '') 
-    : [];
+  let displayText = "";
+  
+  if (story.response) {
+    // Handle case where response might be a string or an object
+    if (typeof story.response === 'string') {
+      displayText = story.response;
+    } else if (typeof story.response === 'object') {
+      // Try to convert object to string if possible
+      try {
+        displayText = JSON.stringify(story.response);
+      } catch (e) {
+        displayText = "Unable to display story content";
+        console.error("Error parsing story response:", e);
+      }
+    }
+  } else {
+    displayText = "Story content not available";
+  }
 
-  console.log('Story display receiving:', { story, paragraphs });
+  // Split the text into paragraphs for better display
+  const paragraphs = displayText.split('\n').filter(p => p.trim() !== '');
+
+  console.log('Story display receiving:', { story, displayText, paragraphs });
 
   return (
     <div className="animate-fade-in">
@@ -37,7 +54,7 @@ const StoryDisplay = ({ story }: StoryDisplayProps) => {
                 <p key={index} className="mb-4">{paragraph}</p>
               ))
             ) : (
-              <p>{response}</p>
+              <p>{displayText}</p>
             )}
           </div>
         </CardContent>

@@ -7,7 +7,7 @@ import StoryLoading from '@/components/StoryLoading';
 
 interface Story {
   post: string;
-  response: string;
+  response: string | any;
 }
 
 const Index = () => {
