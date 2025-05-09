@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { BookOpen } from "lucide-react";
+import { generateFallbackStory } from "@/utils/storyGenerator";
 
 const storyCategories = [
   { id: "adventure", label: "Adventure" },
@@ -52,6 +53,7 @@ interface StoryFormProps {
 const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
   const { toast } = useToast();
   const [submitDisabled, setSubmitDisabled] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
   
   const form = useForm<StoryFormValues>({
     resolver: zodResolver(formSchema),
@@ -69,31 +71,64 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       // Prepare the data for the n8n webhook
       const storyElementsList = data.storyElements.join(", ");
       
-      const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          category: data.category,
-          story_elements_list: storyElementsList,
-          kid_name: data.kidName,
-          kid_age: data.kidAge,
-          custom_section: data.customSection || "",
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to generate story");
+      if (!useFallback) {
+        try {
+          const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              category: data.category,
+              story_elements_list: storyElementsList,
+              kid_name: data.kidName,
+              kid_age: data.kidAge,
+              custom_section: data.customSection || "",
+            }),
+          });
+          
+          if (!response.ok) {
+            throw new Error("Failed to generate story from webhook");
+          }
+          
+          const result = await response.json();
+          onStoryGenerated(result);
+          
+          toast({
+            title: "Story generated!",
+            description: "Your magical bedtime story is ready.",
+          });
+          return;
+        } catch (error) {
+          console.error("Error generating story from webhook:", error);
+          setUseFallback(true);
+          toast({
+            variant: "default",
+            title: "Using offline mode",
+            description: "We couldn't connect to our story wizard, but we'll create a story locally for you.",
+          });
+        }
       }
       
-      const result = await response.json();
-      onStoryGenerated(result);
+      // Use fallback generation if webhook fails
+      const fallbackStory = generateFallbackStory(
+        data.category,
+        data.storyElements,
+        data.kidName,
+        data.kidAge,
+        data.customSection || ""
+      );
+      
+      onStoryGenerated({
+        post: "Here's your magical bedtime story",
+        response: fallbackStory
+      });
       
       toast({
-        title: "Story generated!",
+        title: "Story generated locally!",
         description: "Your magical bedtime story is ready.",
       });
+      
     } catch (error) {
       console.error("Error generating story:", error);
       toast({
@@ -267,6 +302,12 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
               <BookOpen className="mr-2 h-4 w-4" />
               Create Magical Story
             </Button>
+            
+            {useFallback && (
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Using offline mode due to connection issues
+              </p>
+            )}
           </form>
         </Form>
       </CardContent>
