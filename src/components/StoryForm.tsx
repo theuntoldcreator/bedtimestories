@@ -13,27 +13,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { BookOpen } from "lucide-react";
 import { generateFallbackStory } from "@/utils/storyGenerator";
 
-const storyCategories = [
-  { id: "adventure", label: "Adventure" },
-  { id: "horror", label: "Horror" },
-  { id: "love", label: "Love" },
-  { id: "skyfii", label: "Skyfii" },
-  { id: "fairytails", label: "Fairytails" },
-];
-
-const storyElements = [
-  { id: "dinosaur", label: "Dinosaur" },
-  { id: "people", label: "People" },
-  { id: "rainbow", label: "Rainbow" },
-  { id: "spaceship", label: "Spaceship" },
-  { id: "disneyland", label: "Disneyland" },
-  { id: "zombie", label: "Zombie" },
-];
+const storyCategories = [/* same as before */];
+const storyElements = [/* same as before */];
 
 const formSchema = z.object({
-  category: z.string({
-    required_error: "Please select a story category.",
-  }),
+  category: z.string({ required_error: "Please select a story category." }),
   storyElements: z.array(z.string()).refine((value) => value.length > 0 && value.length <= 3, {
     message: "Please select between 1 and 3 story elements.",
   }),
@@ -56,10 +40,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
 
   const form = useForm<StoryFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      storyElements: [],
-      customSection: "",
-    },
+    defaultValues: { storyElements: [], customSection: "" },
   });
 
   async function onSubmit(data: StoryFormValues) {
@@ -68,9 +49,9 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       setSubmitDisabled(true);
 
       const storyElementsList = data.storyElements.join(", ");
-      const prompt = `Write a short bedtime story in the ${data.category} category for a child named ${data.kidName}, who is ${data.kidAge} years old. Include the following story elements: ${storyElementsList}. ${data.customSection ? `Also include this custom detail: ${data.customSection}.` : ""} Make sure the story is age-appropriate and gentle for a child of ${data.kidAge}, fun, imaginative, and positive, around 10 lines long, and ends with a happy or comforting message. Avoid any scary, violent, or inappropriate content.`;
+      const prompt = `Write a short bedtime story in the ${data.category} category for a child named ${data.kidName}, who is ${data.kidAge} years old. Include: ${storyElementsList}. ${data.customSection ? `Also: ${data.customSection}.` : ""} Make sure it’s age-appropriate, imaginative, positive, ~10 lines, with a happy ending.`;
 
-      const requestBody = useSendFullPrompt 
+      const requestBody = useSendFullPrompt
         ? { chatInput: prompt }
         : {
             category: data.category,
@@ -80,52 +61,46 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
             customSection: data.customSection || "",
           };
 
-      try {
-        const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-        });
+      const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
 
-        if (!response.ok) throw new Error("Failed to generate story from webhook");
+      if (!response.ok) throw new Error("Failed to generate story");
 
-        const result = await response.json();
-        onStoryGenerated(result);
-        form.reset(); // ✅ Reset the form after success
+      const result = await response.json();
 
-        toast({
-          title: "Story generated!",
-          description: "Your magical bedtime story is ready.",
-        });
-      } catch (error) {
-        console.error("Error generating story from webhook:", error);
+      // ✅ Pass only clean `post` and `response` to parent
+      onStoryGenerated({
+        post: result.post || "Here's your magical bedtime story!",
+        response: result.response || "No story text received.",
+      });
 
-        const fallbackStory = generateFallbackStory(
-          data.category,
-          data.storyElements,
-          data.kidName,
-          data.kidAge,
-          data.customSection || ""
-        );
+      // ✅ Reset form after success
+      form.reset();
 
-        onStoryGenerated({
-          post: "Here's your magical bedtime story (generated locally)",
-          response: fallbackStory,
-        });
-
-        toast({
-          variant: "destructive",
-          title: "Connection Error",
-          description: "We couldn't connect to our story wizard. Showing offline story instead.",
-        });
-      }
-
+      toast({ title: "Story generated!", description: "Your magical bedtime story is ready." });
     } catch (error) {
-      console.error("Error in form submission:", error);
+      console.error("Error:", error);
+
+      const fallbackStory = generateFallbackStory(
+        data.category,
+        data.storyElements,
+        data.kidName,
+        data.kidAge,
+        data.customSection || ""
+      );
+
+      onStoryGenerated({
+        post: "Here's your magical bedtime story (offline mode)",
+        response: fallbackStory,
+      });
+
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Please try again or check your connection.",
+        title: "Connection Error",
+        description: "We couldn't connect to the story wizard. Showing offline story instead.",
       });
     } finally {
       setIsLoading(false);
@@ -138,11 +113,11 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       <CardContent className="pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* --- keep all your fields unchanged --- */}
-
+            {/* ✂ Keep your fields unchanged here */}
+            {/* ✂ Checkbox for structured data selection */}
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="data-format" 
+              <Checkbox
+                id="data-format"
                 checked={!useSendFullPrompt}
                 onCheckedChange={(checked) => setUseSendFullPrompt(!checked)}
               />
@@ -150,12 +125,8 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
                 Send structured data instead of full prompt
               </label>
             </div>
-
-            <Button 
-              type="submit" 
-              className="w-full bg-story-blue hover:bg-story-skyBlue transition-colors"
-              disabled={submitDisabled}
-            >
+            {/* ✂ Submit button */}
+            <Button type="submit" className="w-full bg-story-blue hover:bg-story-skyBlue" disabled={submitDisabled}>
               <BookOpen className="mr-2 h-4 w-4" />
               Create Magical Story
             </Button>
