@@ -53,7 +53,7 @@ interface StoryFormProps {
 const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
   const { toast } = useToast();
   const [submitDisabled, setSubmitDisabled] = useState(false);
-  const [useFallback, setUseFallback] = useState(false);
+  const [useSendFullPrompt, setUseSendFullPrompt] = useState(true);
   
   const form = useForm<StoryFormValues>({
     resolver: zodResolver(formSchema),
@@ -74,63 +74,65 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       // Create the prompt for the AI based on user input
       const prompt = `Write a short bedtime story in the ${data.category} category for a child named ${data.kidName}, who is ${data.kidAge} years old. Include the following story elements: ${storyElementsList}. ${data.customSection ? `Also include this custom detail: ${data.customSection}.` : ""} Make sure the story is age-appropriate and gentle for a child of ${data.kidAge}, fun, imaginative, and positive, around 10 lines long, and ends with a happy or comforting message. Avoid any scary, violent, or inappropriate content.`;
       
-      if (!useFallback) {
-        try {
-          // Send the chatInput field as requested
-          const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              chatInput: prompt
-            }),
-          });
-          
-          if (!response.ok) {
-            throw new Error("Failed to generate story from webhook");
-          }
-          
-          const result = await response.json();
-          onStoryGenerated(result);
-          
-          toast({
-            title: "Story generated!",
-            description: "Your magical bedtime story is ready.",
-          });
-          return;
-        } catch (error) {
-          console.error("Error generating story from webhook:", error);
-          setUseFallback(true);
-          toast({
-            variant: "default",
-            title: "Using offline mode",
-            description: "We couldn't connect to our story wizard, but we'll create a story locally for you.",
-          });
+      // Prepare the request body based on the format choice
+      const requestBody = useSendFullPrompt 
+        ? { chatInput: prompt }
+        : {
+            category: data.category,
+            storyElements: data.storyElements,
+            kidName: data.kidName,
+            kidAge: data.kidAge,
+            customSection: data.customSection || "",
+          };
+      
+      try {
+        // Send the request to the webhook
+        const response = await fetch("https://bedtimestories.mooo.com/webhook-test/bedtimestories", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to generate story from webhook");
         }
+        
+        const result = await response.json();
+        onStoryGenerated(result);
+        
+        toast({
+          title: "Story generated!",
+          description: "Your magical bedtime story is ready.",
+        });
+      } catch (error) {
+        console.error("Error generating story from webhook:", error);
+        
+        // Use fallback generation if webhook fails
+        toast({
+          variant: "destructive",
+          title: "Connection Error",
+          description: "We couldn't connect to our story wizard. Please check your internet connection and try again.",
+        });
+        
+        // Generate a fallback story
+        const fallbackStory = generateFallbackStory(
+          data.category,
+          data.storyElements,
+          data.kidName,
+          data.kidAge,
+          data.customSection || ""
+        );
+        
+        onStoryGenerated({
+          post: "Here's your magical bedtime story (generated locally)",
+          response: fallbackStory
+        });
       }
       
-      // Use fallback generation if webhook fails
-      const fallbackStory = generateFallbackStory(
-        data.category,
-        data.storyElements,
-        data.kidName,
-        data.kidAge,
-        data.customSection || ""
-      );
-      
-      onStoryGenerated({
-        post: "Here's your magical bedtime story",
-        response: fallbackStory
-      });
-      
-      toast({
-        title: "Story generated locally!",
-        description: "Your magical bedtime story is ready.",
-      });
-      
     } catch (error) {
-      console.error("Error generating story:", error);
+      console.error("Error in form submission:", error);
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
@@ -294,6 +296,17 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
               )}
             />
             
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="data-format" 
+                checked={!useSendFullPrompt}
+                onCheckedChange={(checked) => setUseSendFullPrompt(!checked)}
+              />
+              <label htmlFor="data-format" className="text-sm text-muted-foreground cursor-pointer">
+                Send structured data instead of full prompt
+              </label>
+            </div>
+            
             <Button 
               type="submit" 
               className="w-full bg-story-blue hover:bg-story-skyBlue transition-colors"
@@ -302,12 +315,6 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
               <BookOpen className="mr-2 h-4 w-4" />
               Create Magical Story
             </Button>
-            
-            {useFallback && (
-              <p className="text-xs text-center text-muted-foreground mt-2">
-                Using offline mode due to connection issues
-              </p>
-            )}
           </form>
         </Form>
       </CardContent>
