@@ -79,10 +79,12 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
           };
 
       const response = await fetch("https://bedtimestories.mooo.com/webhook-test/bedtimestories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+      mode: "cors"
       });
+
 
       const responseText = await response.text();
       let result;
