@@ -68,22 +68,22 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       setIsLoading(true);
       setSubmitDisabled(true);
       
-      // Prepare the data for the n8n webhook
+      // Format the story elements list as a comma-separated string
       const storyElementsList = data.storyElements.join(", ");
+      
+      // Create the prompt for the AI based on user input
+      const prompt = `Write a short bedtime story in the ${data.category} category for a child named ${data.kidName}, who is ${data.kidAge} years old. Include the following story elements: ${storyElementsList}. ${data.customSection ? `Also include this custom detail: ${data.customSection}.` : ""} Make sure the story is age-appropriate and gentle for a child of ${data.kidAge}, fun, imaginative, and positive, around 10 lines long, and ends with a happy or comforting message. Avoid any scary, violent, or inappropriate content.`;
       
       if (!useFallback) {
         try {
+          // Send the chatInput field as requested
           const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              category: data.category,
-              story_elements_list: storyElementsList,
-              kid_name: data.kidName,
-              kid_age: data.kidAge,
-              custom_section: data.customSection || "",
+              chatInput: prompt
             }),
           });
           
