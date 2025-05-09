@@ -86,7 +86,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       
       try {
         // Send the request to the webhook
-        const response = await fetch("https://bedtimestories.mooo.com/webhook-test/bedtimestories", {
+        const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
