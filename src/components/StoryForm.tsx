@@ -85,34 +85,36 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
           };
       
       try {
+
+        
         // Send the request to the webhook
-        const response = await fetch("https://bedtimestories.mooo.com/webhook-test/bedtimestories", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        });
-        
-        if (!response.ok) {
-          throw new Error("Failed to generate story from webhook");
-        }
-        
-        const responseText = await response.text();
-        console.log("Raw webhook response:", responseText);
-        
-        try {
-          // Parse the JSON response
-          const result = JSON.parse(responseText);
-          
-          // Destructure the result as requested
-          const { post, response: text } = result;
-          
-          // Call the parent callback with the structured data
-          onStoryGenerated({
-            post: post || "Here's your magical bedtime story!",
-            response: text || "No story text received."
-          });
+       const response = await fetch("https://bedtimestories.mooo.com/webhook-test/bedtimestories", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(requestBody),
+});
+
+const responseText = await response.text();
+let result;
+
+try {
+  result = JSON.parse(responseText);
+} catch (err) {
+  console.warn("Non-JSON or template detected");
+  if (responseText.includes("{{$json.output}}")) {
+    result = {
+      post: "Here's your magical bedtime story!",
+      response: "Our server returned a template response. Please retry shortly.",
+    };
+  } else {
+    throw new Error("Unexpected server response.");
+  }
+}
+
+onStoryGenerated({
+  post: result.post || "Here's your magical bedtime story!",
+  response: result.response || "No story content received.",
+});
           
           toast({
             title: "Story generated!",
