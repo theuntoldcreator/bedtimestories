@@ -242,14 +242,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
                 </FormItem>
               )}
             />
-
-            <div className="flex items-center space-x-2">
-              <Checkbox id="data-format" checked={!useSendFullPrompt} onCheckedChange={(checked) => setUseSendFullPrompt(!checked)} />
-              <label htmlFor="data-format" className="text-sm text-muted-foreground cursor-pointer">
-                Send structured data instead of full prompt
-              </label>
-            </div>
-
+ 
             <Button type="submit" className="w-full bg-story-blue hover:bg-story-skyBlue transition-colors" disabled={submitDisabled}>
               <BookOpen className="mr-2 h-4 w-4" />
               Create Magical Story
