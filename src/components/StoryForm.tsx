@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -99,52 +98,50 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
           throw new Error("Failed to generate story from webhook");
         }
         
-        let result;
+        const responseText = await response.text();
+        console.log("Raw webhook response:", responseText);
+        
         try {
-          // Try to parse the response as JSON
-          const textResponse = await response.text();
-          console.log("Raw webhook response:", textResponse);
+          // Parse the JSON response
+          const result = JSON.parse(responseText);
           
-          try {
-            // First try standard JSON parsing
-            result = JSON.parse(textResponse);
-          } catch (parseError) {
-            console.error("Initial JSON parse error:", parseError);
+          // Destructure the result as requested
+          const { post, response: text } = result;
+          
+          // Call the parent callback with the structured data
+          onStoryGenerated({
+            post: post || "Here's your magical bedtime story!",
+            response: text || "No story text received."
+          });
+          
+          toast({
+            title: "Story generated!",
+            description: "Your magical bedtime story is ready.",
+          });
+        } catch (error) {
+          console.error("JSON parse error:", error);
+          
+          // Handle potential n8n template format issues
+          if (responseText.includes("{{$json.output}}")) {
+            console.log("Detected n8n template format, attempting to fix");
             
-            // If standard parsing fails, try to handle n8n template format
-            // Replace {{$json.output}} with the actual string content
-            const fixedJson = textResponse.replace(/"response":\s*\{\{(\$json\.output)\}\}/, '"response": "Generated story content"');
-            console.log("Attempting to fix JSON:", fixedJson);
+            // Extract post value or use default
+            const postMatch = responseText.match(/"post"\s*:\s*"([^"]+)"/);
+            const post = postMatch ? postMatch[1] : "Here's your magical bedtime story!";
             
-            try {
-              result = JSON.parse(fixedJson);
-            } catch (secondParseError) {
-              console.error("Second JSON parse error:", secondParseError);
-              throw new Error("Could not parse response from webhook");
-            }
+            onStoryGenerated({
+              post: post,
+              response: "Once upon a time..." // Fallback for template placeholder
+            });
+            
+            toast({
+              title: "Story generated!",
+              description: "Your magical bedtime story is ready (placeholder).",
+            });
+          } else {
+            throw new Error("Could not parse response from webhook");
           }
-        } catch (parseError) {
-          console.error("Error parsing response:", parseError);
-          throw new Error("Invalid response from webhook");
         }
-        
-        // Ensure result has the expected format
-        if (!result || typeof result !== 'object') {
-          throw new Error("Invalid response format from webhook");
-        }
-        
-        const storyData = {
-          post: result.post || "Here's your magical bedtime story!",
-          response: result.response || "Once upon a time..."
-        };
-        
-        console.log("Processed story data:", storyData);
-        onStoryGenerated(storyData);
-        
-        toast({
-          title: "Story generated!",
-          description: "Your magical bedtime story is ready.",
-        });
       } catch (error) {
         console.error("Error generating story from webhook:", error);
         

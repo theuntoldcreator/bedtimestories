@@ -7,7 +7,7 @@ import StoryLoading from '@/components/StoryLoading';
 
 interface Story {
   post: string;
-  response: string | any;
+  response: string;
 }
 
 const Index = () => {
@@ -16,13 +16,7 @@ const Index = () => {
 
   const handleStoryGenerated = (story: Story) => {
     console.log('Story received:', story);
-    // Ensure story has the correct structure
-    if (story && typeof story === 'object') {
-      setGeneratedStory({
-        post: story.post || "Here's your magical bedtime story!",
-        response: story.response || ""
-      });
-    }
+    setGeneratedStory(story);
   };
 
   return (
