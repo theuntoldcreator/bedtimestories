@@ -78,7 +78,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
             customSection: data.customSection || "",
           };
 
-      const response = await fetch("https://bedtimestories.mooo.com/webhook-test/bedtimestories", {
+      const response = await fetch("https://bedtimestories.mooo.com/webhook/bedtimestories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
