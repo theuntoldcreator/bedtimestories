@@ -15,7 +15,14 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStoryGenerated = (story: Story) => {
-    setGeneratedStory(story);
+    console.log('Story received:', story);
+    // Ensure story has the correct structure
+    if (story && typeof story === 'object') {
+      setGeneratedStory({
+        post: story.post || "Here's your magical bedtime story!",
+        response: story.response || ""
+      });
+    }
   };
 
   return (

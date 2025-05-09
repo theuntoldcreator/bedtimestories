@@ -13,8 +13,13 @@ interface StoryDisplayProps {
 const StoryDisplay = ({ story }: StoryDisplayProps) => {
   if (!story) return null;
   
-  // Add a safe check for story.response
-  const paragraphs = story.response ? story.response.split('\n') : [];
+  // Add a safe check for story.response and handle different response formats
+  const response = story.response || "";
+  const paragraphs = typeof response === 'string' 
+    ? response.split('\n').filter(p => p.trim() !== '') 
+    : [];
+
+  console.log('Story display receiving:', { story, paragraphs });
 
   return (
     <div className="animate-fade-in">
@@ -27,9 +32,13 @@ const StoryDisplay = ({ story }: StoryDisplayProps) => {
         </CardHeader>
         <CardContent>
           <div className="story-text text-lg">
-            {paragraphs.map((paragraph, index) => (
-              <p key={index} className="mb-4">{paragraph}</p>
-            ))}
+            {paragraphs.length > 0 ? (
+              paragraphs.map((paragraph, index) => (
+                <p key={index} className="mb-4">{paragraph}</p>
+              ))
+            ) : (
+              <p>{response}</p>
+            )}
           </div>
         </CardContent>
       </Card>
