@@ -1,19 +1,11 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,17 +32,11 @@ const storyElements = [
 
 const formSchema = z.object({
   category: z.string({ required_error: "Please select a story category." }),
-  storyElements: z
-    .array(z.string())
-    .refine((value) => value.length > 0 && value.length <= 3, {
-      message: "Please select between 1 and 3 story elements.",
-    }),
+  storyElements: z.array(z.string()).refine((value) => value.length > 0 && value.length <= 3, {
+    message: "Please select between 1 and 3 story elements.",
+  }),
   kidName: z.string().min(1, { message: "Please enter your child's name." }),
-  kidAge: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(12, { message: "Age must be between 1 and 12." }),
+  kidAge: z.coerce.number().int().min(1).max(12, { message: "Age must be between 1 and 12." }),
   customSection: z.string().optional(),
 });
 
@@ -80,17 +66,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       setSubmitDisabled(true);
 
       const storyElementsList = data.storyElements.join(", ");
-      const prompt = `Write a short bedtime story in the ${
-        data.category
-      } category for a child named ${data.kidName}, who is ${
-        data.kidAge
-      } years old. Include the following story elements: ${storyElementsList}. ${
-        data.customSection
-          ? `Also include this custom detail: ${data.customSection}.`
-          : ""
-      } Make sure the story is age-appropriate and gentle for a child of ${
-        data.kidAge
-      }, fun, imaginative, and positive, around 10 lines long, and ends with a happy or comforting message. Avoid any scary, violent, or inappropriate content.`;
+      const prompt = `Write a short bedtime story in the ${data.category} category for a child named ${data.kidName}, who is ${data.kidAge} years old. Include the following story elements: ${storyElementsList}. ${data.customSection ? `Also include this custom detail: ${data.customSection}.` : ""} Make sure the story is age-appropriate and gentle for a child of ${data.kidAge}, fun, imaginative, and positive, around 10 lines long, and ends with a happy or comforting message. Avoid any scary, violent, or inappropriate content.`;
 
       const requestBody = useSendFullPrompt
         ? { chatInput: prompt }
@@ -102,37 +78,36 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
             customSection: data.customSection || "",
           };
 
-      const response = await fetch(
-        "https://bedtimestories.mooo.com/webhook-test/bedtimestories",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-          mode: "cors",
-        }
-      );
-
-      const responseText = await response.text();
-      let result;
-
-      try {
-        result = JSON.parse(responseText);
-      } catch (err) {
-        console.warn("Non-JSON or template response detected");
-        if (responseText.includes("{{$json.output}}")) {
-          result = {
-            post: "Here's your magical bedtime story!",
-            response: "Our server returned a template. Please retry shortly.",
-          };
-        } else {
-          throw new Error("Unrecognized server response.");
-        }
-      }
-
-      onStoryGenerated({
-        post: result.post || "Here's your magical bedtime story!",
-        response: result.response || "No story text received.",
+      const response = await fetch("https://bedtimestories.mooo.com/webhook-test/bedtimestories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+      mode: "cors"
       });
+
+
+ const responseText = await response.text();
+let result;
+
+try {
+  result = JSON.parse(responseText);
+} catch (err) {
+  console.warn("Non-JSON or template response detected");
+  if (responseText.includes("{{$json.output}}")) {
+    result = {
+      post: "Here's your magical bedtime story!",
+      response: "Our server returned a template. Please retry shortly.",
+    };
+  } else {
+    throw new Error("Unrecognized server response.");
+  }
+}
+
+onStoryGenerated({
+  post: result.post || "Here's your magical bedtime story!",
+  response: result.response || "No story text received.",
+});
+
 
       toast({
         title: "Story generated!",
@@ -172,33 +147,15 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
               name="category"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel htmlFor="category" className="text-lg font-medium">
-                    Story Category
-                  </FormLabel>
+                  <FormLabel htmlFor="category" className="text-lg font-medium">Story Category</FormLabel>
                   <FormControl>
-                    <RadioGroup
-                      id="category"
-                      name="category"
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-wrap gap-2"
-                    >
+                    <RadioGroup id="category" name="category" onValueChange={field.onChange} defaultValue={field.value} className="flex flex-wrap gap-2">
                       {storyCategories.map((category) => (
-                        <FormItem
-                          key={category.id}
-                          className="flex items-center space-x-2"
-                        >
+                        <FormItem key={category.id} className="flex items-center space-x-2">
                           <FormControl>
-                            <RadioGroupItem
-                              value={category.id}
-                              id={category.id}
-                              className="peer sr-only"
-                            />
+                            <RadioGroupItem value={category.id} id={category.id} className="peer sr-only" />
                           </FormControl>
-                          <label
-                            htmlFor={category.id}
-                            className="flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium border border-story-lightBlue bg-white peer-data-[state=checked]:bg-story-lightBlue peer-data-[state=checked]:text-story-blue cursor-pointer transition-colors"
-                          >
+                          <label htmlFor={category.id} className="flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium border border-story-lightBlue bg-white peer-data-[state=checked]:bg-story-lightBlue peer-data-[state=checked]:text-story-blue cursor-pointer transition-colors">
                             {category.label}
                           </label>
                         </FormItem>
@@ -214,12 +171,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
               name="storyElements"
               render={() => (
                 <FormItem>
-                  <FormLabel
-                    htmlFor="storyElements"
-                    className="text-lg font-medium"
-                  >
-                    Story Elements (Pick 1-3)
-                  </FormLabel>
+                  <FormLabel htmlFor="storyElements" className="text-lg font-medium">Story Elements (Pick 1-3)</FormLabel>
                   <div className="flex flex-wrap gap-4">
                     {storyElements.map((item) => (
                       <FormField
@@ -236,18 +188,11 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
                                 onCheckedChange={(checked) => {
                                   return checked
                                     ? field.onChange([...field.value, item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      );
+                                    : field.onChange(field.value?.filter((value) => value !== item.id));
                                 }}
                               />
                             </FormControl>
-                            <FormLabel
-                              htmlFor={`element-${item.id}`}
-                              className="text-sm font-normal cursor-pointer"
-                            >
+                            <FormLabel htmlFor={`element-${item.id}`} className="text-sm font-normal cursor-pointer">
                               {item.label}
                             </FormLabel>
                           </FormItem>
@@ -265,19 +210,9 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
                 name="kidName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel
-                      htmlFor="kidName"
-                      className="text-lg font-medium"
-                    >
-                      Child's Name
-                    </FormLabel>
+                    <FormLabel htmlFor="kidName" className="text-lg font-medium">Child's Name</FormLabel>
                     <FormControl>
-                      <Input
-                        id="kidName"
-                        name="kidName"
-                        placeholder="Enter your child's name"
-                        {...field}
-                      />
+                      <Input id="kidName" name="kidName" placeholder="Enter your child's name" {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -287,19 +222,9 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
                 name="kidAge"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="kidAge" className="text-lg font-medium">
-                      Child's Age
-                    </FormLabel>
+                    <FormLabel htmlFor="kidAge" className="text-lg font-medium">Child's Age</FormLabel>
                     <FormControl>
-                      <Input
-                        id="kidAge"
-                        name="kidAge"
-                        type="number"
-                        min="1"
-                        max="12"
-                        placeholder="Age (1-12)"
-                        {...field}
-                      />
+                      <Input id="kidAge" name="kidAge" type="number" min="1" max="12" placeholder="Age (1-12)" {...field} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -311,30 +236,15 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
               name="customSection"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel
-                    htmlFor="customSection"
-                    className="text-lg font-medium"
-                  >
-                    Custom Details (Optional)
-                  </FormLabel>
+                  <FormLabel htmlFor="customSection" className="text-lg font-medium">Custom Details (Optional)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      id="customSection"
-                      name="customSection"
-                      placeholder="E.g., favorite toy, recent event, or special place..."
-                      className="resize-none"
-                      {...field}
-                    />
+                    <Textarea id="customSection" name="customSection" placeholder="E.g., favorite toy, recent event, or special place..." className="resize-none" {...field} />
                   </FormControl>
                 </FormItem>
               )}
             />
-
-            <Button
-              type="submit"
-              className="w-full bg-story-blue hover:bg-story-skyBlue transition-colors"
-              disabled={submitDisabled}
-            >
+ 
+            <Button type="submit" className="w-full bg-story-blue hover:bg-story-skyBlue transition-colors" disabled={submitDisabled}>
               <BookOpen className="mr-2 h-4 w-4" />
               Create Magical Story
             </Button>
