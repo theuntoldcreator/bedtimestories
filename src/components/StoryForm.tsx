@@ -120,7 +120,7 @@ onStoryGenerated({
       setSubmitDisabled(false);
     }
   }
-
+//fixed
   return (
     <Card className="story-card border-none shadow-lg bg-white">
       <CardContent className="pt-6">
