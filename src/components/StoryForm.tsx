@@ -85,12 +85,14 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       mode: "cors"
       });
 
-const result = await response.json();
+
+      const json = await response.json();
 
 onStoryGenerated({
-  post: result.post || "Here's your magical bedtime story!",
-  response: result.response || "No story text received.",
+  post: "Here's your magical bedtime story!",
+  response: json.output || "No story text received.",
 });
+
       toast({
         title: "Story generated!",
         description: "Your magical bedtime story is ready.",
