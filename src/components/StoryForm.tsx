@@ -85,30 +85,12 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
       mode: "cors"
       });
 
-
- const responseText = await response.text();
-let result;
-
-try {
-  result = JSON.parse(responseText);
-} catch (err) {
-  console.warn("Non-JSON or template response detected");
-  if (responseText.includes("{{$json.output}}")) {
-    result = {
-      post: "Here's your magical bedtime story!",
-      response: "Our server returned a template. Please retry shortly.",
-    };
-  } else {
-    throw new Error("Unrecognized server response.");
-  }
-}
+const result = await response.json();
 
 onStoryGenerated({
   post: result.post || "Here's your magical bedtime story!",
   response: result.response || "No story text received.",
 });
-
-
       toast({
         title: "Story generated!",
         description: "Your magical bedtime story is ready.",
