@@ -95,7 +95,7 @@ You can import the full workflow from n8n.json or build it manually with these n
 ✅ Make sure the workflow is active.
 
 🔄 Flow Diagram
-![Alt text of the image](https://github.com/theuntoldcreator/bedtimestories/workflow.png)
+![Alt text of the image](https://github.com/theuntoldcreator/bedtimestories/blob/main/workflow.png)
 
 #### 🧪 Common Issues
 ### ❌ CORS Error?
