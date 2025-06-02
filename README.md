@@ -1,67 +1,116 @@
 # 🌙 Magical Bedtime Stories
 
-Create personalized, AI-generated bedtime stories for children with a magical twist. This project uses a React frontend with form-based customization and a powerful n8n workflow backend powered by Groq AI and webhooks.
+Create magical AI-powered bedtime stories for kids using your child’s name, age, and favorite story elements.
 
-🟢 Live Website: [https://bedtimestories.pages.dev](https://bedtimestories.pages.dev)
-
-📦 GitHub Source: [github.dev/theuntoldcreator/bedtimestories](https://github.dev/theuntoldcreator/bedtimestories)
-
----
-
-## 📸 Preview
-
-![n8n Workflow Overview](./n8n-workflow-preview.png)
+🟢 **Live App:** [bedtimestories.pages.dev](https://bedtimestories.pages.dev)  
+💻 **Source Code:** [GitHub](https://github.dev/theuntoldcreator/bedtimestories)
 
 ---
 
-## 💡 Features
+## ✨ Features
 
-- ✨ Choose from story categories (Adventure, Horror, Love, Sci-fi, Fairy Tales)
-- 🌈 Select magical story elements (Rainbow, Dinosaur, Spaceship, etc.)
-- 🧒 Personalize with child’s name, age, and custom details
-- 🤖 Stories are generated using Groq LLM inside an n8n AI Agent workflow
-- 📬 Webhook integration sends story responses back to the frontend in real-time
-- ⚡ Fully deployed using Cloudflare Pages
-
----
-
-## 🧠 Tech Stack
-
-| Frontend        | Backend / AI          |
-|-----------------|-----------------------|
-| React + Tailwind CSS | n8n (Self-hosted on GCP VM) |
-| Zod + React Hook Form | Groq Chat Model via AI Agent |
-| Cloudflare Pages (Hosting) | Webhook, AI Agent, Response Nodes |
-| Toast Notifications | JSON Clean-up with Set Node |
+- Custom name and age
+- Choose story type: Adventure, Horror, Love, Sci-fi, Fairytales
+- Pick up to 3 story elements (e.g., dinosaur, rainbow, spaceship)
+- Add custom detail (optional)
+- AI-generated story via Groq (GPT-4o)
+- Clean, mobile-friendly UI
+- Hosted on Cloudflare Pages
+- Story served via n8n Webhook
 
 ---
 
-## 🚀 How It Works
+## 🔧 Tech Stack
 
-1. **User Input**: Form takes child’s name, age, category, story elements, and optional custom input.
-2. **POST Webhook**: React app sends the prompt to n8n Webhook URL.
-3. **AI Agent**: n8n triggers a Groq AI model via AI Agent with structured instructions.
-4. **Clean Output**: Removes `<think>` tags and non-story text.
-5. **Send Response**: JSON story is returned to the frontend and displayed in a story card.
-
----
-
-## 🔁 n8n Workflow Overview
-
-1. `Webhook` → listens for prompt
-2. `AI Agent` → calls Groq Chat model with structured system message
-3. `Set` → removes `<think>` block with regex in `cleanedStory`
-4. `Respond to Webhook` → sends `{ "post": "...", "response": $json.cleanedStory }` to frontend
-
-> 🧪 Sample Regex:  
-> `{{$json.output.replace(/<think>[\\s\\S]*?<\\/think>/gi, '').trim()}}`
+| Layer      | Tool                       |
+|------------|----------------------------|
+| Frontend   | React, Tailwind, Vite      |
+| Backend    | n8n + Groq Chat            |
+| Hosting    | Cloudflare Pages, GCP VM   |
+| AI Cleanup | Regex via `Set` node       |
 
 ---
 
-## ⚙️ Deployment Instructions
+## 🚀 Quick Start
 
-### Frontend
+### 1. Clone the Project
+
+```bash
+git clone https://github.com/theuntoldcreator/bedtimestories
+cd bedtimestories
+```
+
+## 2. Frontend Setup (React)
 
 ```bash
 npm install
-npm run dev # or deploy to Cloudflare Pages
+npm run dev         # Local development
+``` 
+
+#### Deploy to Cloudflare Pages
+Connect this repo to Cloudflare Pages:
+
+Build command: ```npm run build```
+
+Output directory: ```dist```
+
+
+
+## 3. Backend Setup (n8n + Groq)
+Run n8n in Docker on GCP:
+```bash
+docker run -d --name n8n \
+-p 5678:5678 \
+-e N8N_BASIC_AUTH_ACTIVE=false \
+-e N8N_CORS_ALLOW_ORIGIN=https://bedtimestories.pages.dev \
+-e N8N_CORS_ALLOW_METHODS=GET,POST,OPTIONS \
+-e N8N_CORS_ALLOW_HEADERS="Content-Type,Authorization" \
+-e WEBHOOK_URL=https://your-domain.com \
+n8nio/n8n
+```
+## 4. Setup n8n Workflow
+You can import the full workflow from n8n.json or build it manually with these nodes:
+
+#### A. Webhook – listens to POST from frontend
+
+
+#### B. AI Agent – receives story prompt
+
+
+#### C. Groq Chat Model – GPT-4o backend
+
+
+#### D. Set Node – removes <think>...</think> using:
+```bash
+{{ $json.output ? $json.output.replace(/<think>[\s\S]*?<\/think>/gi, '').trim() : '' }}
+```
+
+#### E. Respond to Webhook – sends JSON back to frontend:
+```bash
+{
+  "post": "Here's your magical bedtime story!",
+  "response": "{{ $json.cleanedStory }}"
+}
+```
+✅ Make sure the workflow is active.
+
+🔄 Flow Diagram
+![Alt text of the image](https://github.com/theuntoldcreator/bedtimestories/workflow.png)
+
+#### 🧪 Common Issues
+### ❌ CORS Error?
+Make sure N8N_CORS_ALLOW_ORIGIN=https://bedtimestories.pages.dev is set.
+
+### ❌ Webhook Returns Template?
+Ensure your Respond node returns proper JSON and not {{$json.output}}.
+
+## 5. 🛠 Future Ideas
+🗣️ Add voice (text-to-speech)
+📄 Download as PDF
+🖼️ AI-generated story art
+🧑‍🎓 Add multi-language support
+📄 License
+MIT © [TheUntoldCreator](https://github.dev/theuntoldcreator)
+
+“Because every child deserves a magical story made just for them.”
+
