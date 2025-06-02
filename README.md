@@ -1,73 +1,67 @@
-# Welcome to your Lovable project
+# 🌙 Magical Bedtime Stories
 
-## Project info
+Create personalized, AI-generated bedtime stories for children with a magical twist. This project uses a React frontend with form-based customization and a powerful n8n workflow backend powered by Groq AI and webhooks.
 
-**URL**: https://lovable.dev/projects/5dcedfbd-d2c6-4e88-bddd-840aad97c7c0
+🟢 Live Website: [https://bedtimestories.pages.dev](https://bedtimestories.pages.dev)
 
-## How can I edit this code?
+📦 GitHub Source: [github.dev/theuntoldcreator/bedtimestories](https://github.dev/theuntoldcreator/bedtimestories)
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 📸 Preview
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5dcedfbd-d2c6-4e88-bddd-840aad97c7c0) and start prompting.
+![n8n Workflow Overview](./n8n-workflow-preview.png)
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## 💡 Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- ✨ Choose from story categories (Adventure, Horror, Love, Sci-fi, Fairy Tales)
+- 🌈 Select magical story elements (Rainbow, Dinosaur, Spaceship, etc.)
+- 🧒 Personalize with child’s name, age, and custom details
+- 🤖 Stories are generated using Groq LLM inside an n8n AI Agent workflow
+- 📬 Webhook integration sends story responses back to the frontend in real-time
+- ⚡ Fully deployed using Cloudflare Pages
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## 🧠 Tech Stack
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+| Frontend        | Backend / AI          |
+|-----------------|-----------------------|
+| React + Tailwind CSS | n8n (Self-hosted on GCP VM) |
+| Zod + React Hook Form | Groq Chat Model via AI Agent |
+| Cloudflare Pages (Hosting) | Webhook, AI Agent, Response Nodes |
+| Toast Notifications | JSON Clean-up with Set Node |
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🚀 How It Works
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+1. **User Input**: Form takes child’s name, age, category, story elements, and optional custom input.
+2. **POST Webhook**: React app sends the prompt to n8n Webhook URL.
+3. **AI Agent**: n8n triggers a Groq AI model via AI Agent with structured instructions.
+4. **Clean Output**: Removes `<think>` tags and non-story text.
+5. **Send Response**: JSON story is returned to the frontend and displayed in a story card.
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🔁 n8n Workflow Overview
 
-**Use GitHub Codespaces**
+1. `Webhook` → listens for prompt
+2. `AI Agent` → calls Groq Chat model with structured system message
+3. `Set` → removes `<think>` block with regex in `cleanedStory`
+4. `Respond to Webhook` → sends `{ "post": "...", "response": $json.cleanedStory }` to frontend
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+> 🧪 Sample Regex:  
+> `{{$json.output.replace(/<think>[\\s\\S]*?<\\/think>/gi, '').trim()}}`
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## ⚙️ Deployment Instructions
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Frontend
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/5dcedfbd-d2c6-4e88-bddd-840aad97c7c0) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+npm install
+npm run dev # or deploy to Cloudflare Pages

@@ -1,5 +1,4 @@
 {
-  "name": "bedtimestories",
   "nodes": [
     {
       "parameters": {
@@ -65,7 +64,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.2,
       "position": [
-        440,
+        400,
         -160
       ],
       "id": "4af270cd-5ba2-4c3c-8947-ef232bf2aa6b",
@@ -92,19 +91,7 @@
       }
     }
   ],
-  "pinData": {},
   "connections": {
-    "Groq Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Webhook": {
       "main": [
         [
@@ -137,17 +124,27 @@
           }
         ]
       ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "8a733664-c14f-4be0-96b6-e03d4205636c",
+  "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0583feb6ccf9bea6d4036a131e90bd94fe8ee4b248d3811ffcdc18bfb3ab9509"
-  },
-  "id": "6AitVRsbE1hm7pcC",
-  "tags": []
+  }
 }
