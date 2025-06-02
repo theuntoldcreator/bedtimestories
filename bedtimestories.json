@@ -1,0 +1,153 @@
+{
+  "name": "bedtimestories",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bedtimestories",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -340,
+        -160
+      ],
+      "id": "a3ad49e1-f811-4664-b7f0-aa9392a8d878",
+      "name": "Webhook",
+      "webhookId": "8954c3b6-9653-48cf-bbb7-7898d3006876"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.chatInput }}",
+        "options": {
+          "systemMessage": "You are a bedtime story assistant. Only return the story text. Never include <think> or internal thoughts. Keep it gentle, imaginative, age-appropriate, ~10 lines, and end with a happy message."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -140,
+        -160
+      ],
+      "id": "5f3f170f-5874-4048-b5f3-19a02f820468",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "output",
+              "value": "={{ $json.output.replace(/<think>[\\s\\S]*?<\\/think>/gi, '').trim() }}\n",
+              "type": "string",
+              "id": "09e2bc8e-b1a8-4ae2-99ca-ffc133a4da8a"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        200,
+        -160
+      ],
+      "id": "5b1ed42d-735c-491d-a736-59deff736571",
+      "name": "Clean AI Output"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        -160
+      ],
+      "id": "4af270cd-5ba2-4c3c-8947-ef232bf2aa6b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-r1-distill-llama-70b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        60
+      ],
+      "id": "993a7d02-d63b-4841-8a54-9fadb6ab0d0d",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "khDGCECeUZDWKO0a",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Clean AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean AI Output": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a733664-c14f-4be0-96b6-e03d4205636c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0583feb6ccf9bea6d4036a131e90bd94fe8ee4b248d3811ffcdc18bfb3ab9509"
+  },
+  "id": "6AitVRsbE1hm7pcC",
+  "tags": []
+}
