@@ -78,7 +78,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
             customSection: data.customSection || "",
           };
 
-      const response = await fetch("https://tinglingly-zoonal-delpha.ngrok-free.dev/webhook/bedtimestories", { 
+      const response = await fetch("https://saivanka.tail75cefd.ts.net/webhook/bedtimestories", { 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
