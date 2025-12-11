@@ -40,7 +40,7 @@ git clone https://github.com/theuntoldcreator/bedtimestories
 cd bedtimestories
 ```
 
-## 2. Frontend Setup (React)
+### 2. Frontend Setup (React)
 
 ```bash
 npm install
@@ -54,9 +54,7 @@ Build command: ```npm run build```
 
 Output directory: ```dist```
 
-
-
-## 3. Backend Setup (n8n + Groq)
+### 3. Backend Setup (n8n + Groq)
 Run n8n in Docker on GCP:
 ```bash
 docker run -d --name n8n \
@@ -68,17 +66,13 @@ docker run -d --name n8n \
 -e WEBHOOK_URL=https://your-domain.com \
 n8nio/n8n
 ```
-## 4. Setup n8n Workflow
-You can import the full workflow from n8n.json or build it manually with these nodes:
-
+### 4. Setup n8n Workflow
+You can import the full workflow from n8n.json or build it manually with these nodes: 
 #### A. Webhook – listens to POST from frontend
-
 
 #### B. AI Agent – receives story prompt
 
-
 #### C. Groq Chat Model – GPT-4o backend
-
 
 #### D. Set Node – removes <think>...</think> using:
 ```bash
@@ -104,13 +98,11 @@ Make sure N8N_CORS_ALLOW_ORIGIN=https://bedtimestories.pages.dev is set.
 ### ❌ Webhook Returns Template?
 Ensure your Respond node returns proper JSON and not {{$json.output}}.
 
-## 5. 🛠 Future Ideas
-🗣️ Add voice (text-to-speech)
-📄 Download as PDF
-🖼️ AI-generated story art
-🧑‍🎓 Add multi-language support
-📄 License
+## 🛠 Future Ideas
+- 🗣️ Add voice (text-to-speech)
+- 📄 Download as PDF
+- 🖼️ AI-generated story art
+- 🧑‍🎓 Add multi-language support
+## 📄 License
 MIT © [TheUntoldCreator](https://github.dev/theuntoldcreator)
-
 “Because every child deserves a magical story made just for them.”
-
