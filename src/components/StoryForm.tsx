@@ -78,7 +78,7 @@ const StoryForm = ({ onStoryGenerated, setIsLoading }: StoryFormProps) => {
             customSection: data.customSection || "",
           };
 
-      const response = await fetch("https://saivanka.tail75cefd.ts.net/webhook/bedtimestories", { 
+      const response = await fetch("https://inspired-chronicle-cartoons-reflected.trycloudflare.com/webhook/bedtimestories", { 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
